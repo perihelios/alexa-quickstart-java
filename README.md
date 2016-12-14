@@ -24,9 +24,9 @@ To successfully deploy and use your skill:
 
 ## Quick Steps
 
-If you're fairly good at navigating through Web interfaces (like the <a href="https://developer.amazon.com/" target="_blank">Amazon Developer portal</a> we'll be using), you can just follow the simple textual steps here. If you need more help, including screenshots, go to [Full Steps](#full-steps).
+If you're fairly good at navigating through Web interfaces (like the [Amazon Developer portal](https://developer.amazon.com/) we'll be using), you can just follow the simple textual steps here. If you need more help, including screenshots, go to [Full Steps](#full-steps).
 
- 1. Go to the <a href="https://developer.amazon.com/edw/home.html#/skills/list" target="_blank">Alexa Skills List in the Amazon Developer portal</a>.
+ 1. Go to the [Alexa Skills List in the Amazon Developer portal](https://developer.amazon.com/edw/home.html#/skills/list).
  1. Click *Add a New Skill*.
  1. Enter **Favorite Color** as the *Name*, and **my favorite color** as the *Invocation Name*.
  1. Click Next.
