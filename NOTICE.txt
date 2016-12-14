@@ -1,0 +1,7 @@
+Alexa Quickstart for Java
+Copyright 2016, Perihelios LLC
+Perihelios is a trademark of Perihelios LLC.
+
+This project includes software developed by
+Perihelios LLC (http://www.perihelios.com/).
+Perihelios is a trademark of Perihelios LLC.
