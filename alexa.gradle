@@ -116,7 +116,7 @@ task alexaDeploySkill(dependsOn: ":build", description: "Deploys an Amazon Echo 
 		createFunctionRequest.handler = properties.lambdaHandler
 		createFunctionRequest.role = createOrResolveIamRoleArn(properties)
 
-		lambda.createFunction(createFunctionRequest)
+		String arn = lambda.createFunction(createFunctionRequest).functionArn
 
 		AddPermissionRequest permissionRequest = new AddPermissionRequest()
 		permissionRequest.functionName = properties.lambdaFunctionName
@@ -125,6 +125,8 @@ task alexaDeploySkill(dependsOn: ":build", description: "Deploys an Amazon Echo 
 		permissionRequest.statementId = "AlexaSkillsTrigger"
 
 		lambda.addPermission(permissionRequest)
+
+		return arn
 	}
 
 	def updateLambdaCode = { LambdaProperties properties ->
@@ -135,7 +137,7 @@ task alexaDeploySkill(dependsOn: ":build", description: "Deploys an Amazon Echo 
 		request.functionName = properties.lambdaFunctionName
 		request.zipFile = ByteBuffer.wrap(readAllBytes(properties.zipFilePath))
 
-		lambda.updateFunctionCode(request)
+		return lambda.updateFunctionCode(request).functionArn
 	}
 
 	def createOrUpdateLambda = { LambdaProperties properties ->
@@ -147,9 +149,9 @@ task alexaDeploySkill(dependsOn: ":build", description: "Deploys an Amazon Echo 
 
 		try {
 			lambda.getFunctionConfiguration(request)
-			updateLambdaCode properties
+			return updateLambdaCode(properties)
 		} catch (ResourceNotFoundException e) {
-			createLambda properties
+			return createLambda(properties)
 		}
 	}
 
@@ -197,6 +199,8 @@ task alexaDeploySkill(dependsOn: ":build", description: "Deploys an Amazon Echo 
 
 		properties.zipFilePath = Paths.get(project.buildDir.path, "distributions", project.name + ".zip")
 
-		createOrUpdateLambda properties
+		String arn = createOrUpdateLambda(properties)
+
+		println "Lambda ARN: $arn"
 	}
 }
