@@ -1,5 +1,5 @@
-Intent JSON:
-------------
+Intent Schema JSON:
+-------------------
 {
   "intents": [{
     "intent": "ColorIntent",
@@ -12,7 +12,7 @@ Intent JSON:
 
 
 Values List for COLOR Custom Slot Type:
---------------------------------
+---------------------------------------
 red
 green
 blue
