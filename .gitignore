@@ -1,5 +1,7 @@
 build/
 
+*.iml
+*.log
 .*
 
 !.gitignore
