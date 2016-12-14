@@ -1,5 +1,6 @@
-Intent Schema JSON:
--------------------
+==================
+Intent Schema JSON
+==================
 {
   "intents": [{
     "intent": "ColorIntent",
@@ -11,8 +12,9 @@ Intent Schema JSON:
 }
 
 
-Custom Slot Type values list for COLOR:
----------------------------------------
+======================================
+Custom Slot Type values list for COLOR
+======================================
 red
 green
 blue
@@ -23,6 +25,7 @@ purple
 violet
 
 
-Sample Utterance:
------------------
+================
+Sample Utterance
+================
 ColorIntent {color}
