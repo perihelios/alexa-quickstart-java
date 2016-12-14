@@ -1,0 +1,202 @@
+import com.amazonaws.auth.AWSCredentialsProvider
+import com.amazonaws.auth.AWSCredentialsProviderChain
+import com.amazonaws.auth.InstanceProfileCredentialsProvider
+import com.amazonaws.auth.profile.ProfileCredentialsProvider
+import com.amazonaws.regions.Region
+import com.amazonaws.regions.Regions
+import com.amazonaws.services.identitymanagement.AmazonIdentityManagement
+import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClient
+import com.amazonaws.services.identitymanagement.model.CreateRoleRequest
+import com.amazonaws.services.identitymanagement.model.GetRoleRequest
+import com.amazonaws.services.identitymanagement.model.NoSuchEntityException
+import com.amazonaws.services.identitymanagement.model.PutRolePolicyRequest
+import com.amazonaws.services.lambda.AWSLambda
+import com.amazonaws.services.lambda.AWSLambdaClient
+import com.amazonaws.services.lambda.model.AddPermissionRequest
+import com.amazonaws.services.lambda.model.CreateFunctionRequest
+import com.amazonaws.services.lambda.model.FunctionCode
+import com.amazonaws.services.lambda.model.GetFunctionConfigurationRequest
+import com.amazonaws.services.lambda.model.ResourceNotFoundException
+import com.amazonaws.services.lambda.model.Runtime
+import com.amazonaws.services.lambda.model.UpdateFunctionCodeRequest
+
+import java.nio.ByteBuffer
+import java.nio.file.Files
+import java.nio.file.Paths
+
+import static java.nio.file.Files.readAllBytes
+
+buildscript {
+	repositories {
+		mavenCentral()
+	}
+
+	dependencies {
+		classpath "com.amazonaws:aws-java-sdk-iam:1.11.66"
+		classpath "com.amazonaws:aws-java-sdk-lambda:1.11.66"
+	}
+}
+
+class LambdaProperties {
+	String lambdaFunctionName
+	String lambdaHandler
+	String lambdaIamRole
+	int lambdaMemoryMb
+	int lambdaTimeoutSeconds
+	java.nio.file.Path zipFilePath
+}
+
+task alexaDeploySkill(dependsOn: ":build", description: "Deploys an Amazon Echo (Alexa) skill as an AWS Lambda function") {
+	AWSCredentialsProvider awsCredentialsProvider = new AWSCredentialsProviderChain(
+		InstanceProfileCredentialsProvider.getInstance(),
+		new ProfileCredentialsProvider()
+	)
+
+	def createOrResolveIamRoleArn = { LambdaProperties properties ->
+		AmazonIdentityManagement iam = new AmazonIdentityManagementClient(awsCredentialsProvider)
+
+		GetRoleRequest getRoleRequest = new GetRoleRequest()
+		getRoleRequest.roleName = properties.lambdaIamRole
+
+		try {
+			return iam.getRole(getRoleRequest).role.arn
+		} catch (NoSuchEntityException e) {
+			CreateRoleRequest createRoleRequest = new CreateRoleRequest()
+			createRoleRequest.roleName = properties.lambdaIamRole
+			createRoleRequest.assumeRolePolicyDocument = """{
+				"Version": "2012-10-17",
+				"Statement": [{
+					"Effect": "Allow",
+					"Principal": {
+						"Service": "lambda.amazonaws.com"
+					},
+					"Action": "sts:AssumeRole"
+				}]
+			}"""
+
+			String arn = iam.createRole(createRoleRequest).role.arn
+
+			PutRolePolicyRequest putRolePolicyRequest = new PutRolePolicyRequest()
+			putRolePolicyRequest.policyName = properties.lambdaIamRole
+			putRolePolicyRequest.roleName = properties.lambdaIamRole
+			putRolePolicyRequest.policyDocument = """{
+				"Version": "2012-10-17",
+				"Statement": [{
+                    "Effect": "Allow",
+                    "Action": [
+                        "logs:CreateLogGroup",
+                        "logs:CreateLogStream",
+                        "logs:PutLogEvents"
+                    ],
+                    "Resource": "arn:aws:logs:*:*:*"
+				}]
+			}"""
+
+			iam.putRolePolicy(putRolePolicyRequest)
+
+			// TODO: I've seen one failure of the Lambda to create because the role wasn't accessible, yet. Need to figure out why, possibly wait for role availability.
+
+			return arn
+		}
+	}
+
+	def createLambda = { LambdaProperties properties ->
+		AWSLambda lambda = new AWSLambdaClient(awsCredentialsProvider)
+		lambda.region = Region.getRegion(Regions.US_EAST_1)
+
+		FunctionCode code = new FunctionCode()
+		code.zipFile = ByteBuffer.wrap(readAllBytes(properties.zipFilePath))
+
+		CreateFunctionRequest createFunctionRequest = new CreateFunctionRequest()
+		createFunctionRequest.functionName = properties.lambdaFunctionName
+		createFunctionRequest.runtime = Runtime.Java8
+		createFunctionRequest.memorySize = properties.lambdaMemoryMb
+		createFunctionRequest.timeout = properties.lambdaTimeoutSeconds
+		createFunctionRequest.code = code
+		createFunctionRequest.handler = properties.lambdaHandler
+		createFunctionRequest.role = createOrResolveIamRoleArn(properties)
+
+		lambda.createFunction(createFunctionRequest)
+
+		AddPermissionRequest permissionRequest = new AddPermissionRequest()
+		permissionRequest.functionName = properties.lambdaFunctionName
+		permissionRequest.action = "lambda:InvokeFunction"
+		permissionRequest.principal = "alexa-appkit.amazon.com"
+		permissionRequest.statementId = "AlexaSkillsTrigger"
+
+		lambda.addPermission(permissionRequest)
+	}
+
+	def updateLambdaCode = { LambdaProperties properties ->
+		AWSLambda lambda = new AWSLambdaClient(awsCredentialsProvider)
+		lambda.region = Region.getRegion(Regions.US_EAST_1)
+
+		UpdateFunctionCodeRequest request = new UpdateFunctionCodeRequest()
+		request.functionName = properties.lambdaFunctionName
+		request.zipFile = ByteBuffer.wrap(readAllBytes(properties.zipFilePath))
+
+		lambda.updateFunctionCode(request)
+	}
+
+	def createOrUpdateLambda = { LambdaProperties properties ->
+		AWSLambda lambda = new AWSLambdaClient(awsCredentialsProvider)
+		lambda.region = Region.getRegion(Regions.US_EAST_1)
+
+		GetFunctionConfigurationRequest request = new GetFunctionConfigurationRequest()
+		request.functionName = properties.lambdaFunctionName
+
+		try {
+			lambda.getFunctionConfiguration(request)
+			updateLambdaCode properties
+		} catch (ResourceNotFoundException e) {
+			createLambda properties
+		}
+	}
+
+	def validateAppIdSet = {
+		java.nio.file.Path propertiesFilePath = Paths.get(project.projectDir.path, "src", "main", "resources", "app-id.properties")
+		if (!Files.exists(propertiesFilePath)) {
+			throw new IllegalStateException("Required properties file app-id.properties (path: " + propertiesFilePath + ") not found")
+		}
+
+		propertiesFilePath.withReader { reader ->
+			Properties properties = new Properties()
+			properties.load(reader)
+
+			String appId = properties.getProperty("app-id")
+
+			if (appId == null || appId.isEmpty()) {
+				throw new IllegalStateException("You must set app-id in the app-id.properties file (path: " + propertiesFilePath +
+					") to successfully deploy your skill")
+			}
+
+			if (!appId.matches(/amzn1\.ask\.skill\.[0-9a-fA-F-]+/)) {
+				throw new IllegalStateException("The value of app-id in the app-id.properties file (path: " + propertiesFilePath +
+					") is not in the correct format; it should be something like amzn1.ask.skill.<random-hex-digits>")
+			}
+		}
+	}
+
+	doLast {
+		validateAppIdSet()
+
+		def propertiesFile = file("aws.properties")
+
+		LambdaProperties properties = propertiesFile.withReader { reader ->
+			Properties awsProperties = new Properties()
+			awsProperties.load(reader)
+
+			return new LambdaProperties(
+				lambdaFunctionName: awsProperties.getProperty("lambda-function-name"),
+				lambdaHandler: awsProperties.getProperty("lambda-handler"),
+				lambdaIamRole: awsProperties.getProperty("lambda-iam-role"),
+				lambdaMemoryMb: awsProperties.getProperty("lambda-memory-mb").toInteger(),
+				lambdaTimeoutSeconds: awsProperties.getProperty("lambda-timeout-seconds").toInteger(),
+			)
+		}
+
+		properties.zipFilePath = Paths.get(project.buildDir.path, "distributions", project.name + ".zip")
+
+		createOrUpdateLambda properties
+	}
+}

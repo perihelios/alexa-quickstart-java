@@ -1,0 +1,61 @@
+apply plugin: "java"
+apply plugin: "idea"
+apply plugin: "eclipse"
+
+// TODO: Fix duplication from alexa.gradle (IntelliJ issue)
+buildscript {
+	repositories {
+		mavenCentral()
+	}
+
+	dependencies {
+		classpath "com.amazonaws:aws-java-sdk-iam:1.11.66"
+		classpath "com.amazonaws:aws-java-sdk-lambda:1.11.66"
+	}
+}
+
+apply from: "alexa.gradle"
+
+sourceCompatibility = 1.8
+
+idea {
+	module {
+		excludeDirs += file('.idea')
+		excludeDirs += file('gradle')
+	}
+}
+
+configurations {
+	// JUnit includes the grotty hamcrest-core, instead of hamcrest-all
+	all*.exclude group: "org.hamcrest", module: "hamcrest-core"
+
+	// Alexa Skills Kit (ASK), the ill-mannered beast, includes Log4J, but we want Logback
+	all*.exclude group: "org.slf4j", module: "slf4j-log4j12"
+	all*.exclude group: "log4j", module: "log4j"
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	// Logging
+	compile "org.slf4j:slf4j-api:1.7.22"
+	compile "ch.qos.logback:logback-classic:1.1.8"
+
+	// AWS
+	compile "com.amazon.alexa:alexa-skills-kit:1.2"
+
+	testCompile "junit:junit:4.12"
+	testCompile "org.hamcrest:hamcrest-all:1.3"
+}
+
+task buildZip(type: Zip) {
+	from compileJava
+	from processResources
+	into("lib") {
+		from configurations.runtime
+	}
+}
+
+build.dependsOn buildZip

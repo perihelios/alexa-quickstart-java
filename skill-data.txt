@@ -1,0 +1,28 @@
+Intent JSON:
+------------
+{
+  "intents": [{
+    "intent": "ColorIntent",
+    "slots": [{
+        "name": "color",
+        "type": "COLOR"
+      }]
+  }]
+}
+
+
+Values List for COLOR Custom Slot Type:
+--------------------------------
+red
+green
+blue
+yellow
+orange
+black
+purple
+violet
+
+
+Sample Utterance:
+-----------------
+ColorIntent {color}
