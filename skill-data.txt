@@ -11,7 +11,7 @@ Intent Schema JSON:
 }
 
 
-Values List for COLOR Custom Slot Type:
+Custom Slot Type values list for COLOR:
 ---------------------------------------
 red
 green
