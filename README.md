@@ -40,7 +40,8 @@ screenshots, go to [Full Steps](#full-steps).
  1. Select **Custom Interaction Model** as the *Skill Type*.
  1. Enter **Favorite Color** as the *Name*, and **my favorite color** as the
     *Invocation Name*.
- 1. Click Next.
+ 1. Click *Save*.
+ 1. Click *Next*.
  1. Copy your skill's app ID (near the top of the screen - it looks like
     `amzn1.ask.skill.xxxxx`) and paste it into the
     [src/main/resources/app-id.properties](src/main/resources/app-id.properties)
