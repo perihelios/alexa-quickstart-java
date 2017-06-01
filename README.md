@@ -23,7 +23,12 @@ To successfully deploy and use your skill:
  1. Your Echo (or Echo Dot) must be physically set up and connected to the
     Internet, and associated with your Amazon account.
  1. AWS must be usable with your (same) Amazon account, and you need to have
-    your `$HOME/.aws/credentials` configured appropriately.
+    AWS credentials configured on the computer where you will be working on this
+    project (for instance, you may use the file `$HOME/.aws/credentials`, or
+    environment variables, or another mechanism; see this
+    [AWS article](https://aws.amazon.com/blogs/security/a-new-and-standardized-way-to-manage-credentials-in-the-aws-sdks/)
+    and the [Developer Guide](http://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html)
+    for details).
  1. A Java 8 JDK must be installed and configured appropriately for your system
     (e.g., `JAVA_HOME` set, `$JAVA_HOME/bin` on your path).
 
