@@ -42,29 +42,26 @@ screenshots, go to [Full Steps](#full-steps).
  1. Go to your
     [Alexa Skills Kit list in the Amazon Developer portal](https://developer.amazon.com/edw/home.html#/skills/list).
  1. Click *Add a New Skill*.
- 1. Select **Custom Interaction Model** as the *Skill Type*.
  1. Enter **Favorite Color** as the *Name*, and **my favorite color** as the
     *Invocation Name*.
- 1. Click *Save*.
- 1. Click *Next*.
+ 1. Click *Save*, then click *Next*.
  1. Copy your skill's app ID (near the top of the screen - it looks like
     `amzn1.ask.skill.xxxxx`) and paste it into the
     [src/main/resources/app-id.properties](src/main/resources/app-id.properties)
     file in your Java project.
- 1. From a command prompt, in your Java project's directory, run
-    `./gradlew alexaDeploySkill`.
- 1. Record the *Lambda ARN* printed by the Gradle build script; you'll need it
-    later.
- 1. Back in the Amazon Developer portal, using the
-    [skill-data.txt](skill-data.txt) file in your Java project as a source for
+ 1. Using [skill-data.txt](skill-data.txt) in your Java project as a source for
     copying data:
     1. Copy and paste the *Intent Schema* JSON.
     1. Add a new *Custom Slot Type* named `COLOR`; copy and paste the list of
        colors.
     1. Copy and paste the *Sample Utterance*.
     1. Click *Next* and wait for the model to build and the next page to appear.
- 1. Select *AWS Lambda ARN* and check *North America*, and paste the Lambda ARN
-    printed by the Gradle script into the text box.
+ 1. From a command prompt, in your Java project's directory, run
+    `./gradlew alexaDeploySkill`.
+ 1. Copy the *Lambda ARN* printed by the Gradle build script.
+ 1. Back in the Amazon Developer portal, select *AWS Lambda ARN* and check
+    *North America*; paste the Lambda ARN printed by the Gradle script into the
+    text box.
  1. Click *Next*.
 
 That's it! Now you can talk with Alexa. (The first time you access a new skill,
@@ -75,7 +72,67 @@ Say: **Alexa, ask my favorite color**. Then just listen and respond!
 
 ## Full Steps
 
-**TODO!**
+ 1. Go to your
+    [Alexa Skills Kit list in the Amazon Developer portal](https://developer.amazon.com/edw/home.html#/skills/list).
+    Log in with the Amazon account to which your Echo (or Echo Dot) is attached.
+    
+    Even if you use the link above, Amazon probably won't take you to the Alexa
+    Skills Kit list if you're redirected through the login process. In this
+    case, click *ALEXA* in the top menu, then click *Get Started* on the *Alexa
+    Skills Kit* item:
+    
+    ![Clicking Alexa in the top menu, then clicking Get Started](readme-files/01.png)
+    
+    You'll now see a list of skills (empty, if you haven't made a skill, before).
+ 1. Click *Add a New Skill*, in the top-right corner:
+    
+    ![Clicking Add a New Skill](readme-files/02.png)
+ 1. Enter **Favorite Color** as the *Name*, and **my favorite color** as the
+    *Invocation Name*:
+    
+    ![Entering Name and Invocation Name](readme-files/03.png)
+    
+    Leave the other settings as the defaults.
+ 1. Click *Save*:
+    
+    ![Clicking Save](readme-files/04.png)
+ 1. Click *Next*:
+    
+    ![Clicking Next](readme-files/05.png)
+ 1. Copy your skill's app ID (near the top of the screen - it looks like
+    `amzn1.ask.skill.xxxxx`) and paste it into the
+    [src/main/resources/app-id.properties](src/main/resources/app-id.properties)
+    file in your Java project:
+    
+    ![Copying your skill's app ID](readme-files/06.png)
+ 1. Using [skill-data.txt](skill-data.txt) in your Java project as a source for
+    copying data:
+    1. Copy and paste the *Intent Schema* JSON.
+    
+       ![Pasting the Intent Schema](readme-files/07.png)
+    1. Add a new *Custom Slot Type* named `COLOR`:
+       
+       ![Adding the COLOR Custom Slot Type](readme-files/08.png)
+    1. Copy and paste the *Sample Utterance*.
+       
+       ![Pasting the Sample Utterance](readme-files/09.png)
+    1. Click *Next* and wait for the model to build and the next page to appear.
+       
+       ![Clicking Next](readme-files/05.png)
+ 1. From a command prompt, in your Java project's directory, run
+    `./gradlew alexaDeploySkill` (on Linux or Mac), or
+    `gradlew alexaDeploySkill` (on Windows).
+ 1. Copy the *Lambda ARN* printed by the Gradle build script:
+    
+    ![Copying the Lambda ARN](readme-files/10.png)
+ 1. Back in the Amazon Developer portal, select *AWS Lambda ARN* and check
+    *North America*; paste the Lambda ARN printed by the Gradle script into the
+    text box:
+    
+    ![Configuring the AWS Lambda ARN](readme-files/11.png)
+ 1. Click *Next*.
+    
+    ![Clicking Next](readme-files/05.png)
 
 ## License
 
