@@ -37,6 +37,7 @@ screenshots, go to [Full Steps](#full-steps).
  1. Go to your
     [Alexa Skills Kit list in the Amazon Developer portal](https://developer.amazon.com/edw/home.html#/skills/list).
  1. Click *Add a New Skill*.
+ 1. Select **Custom Interaction Model** as the *Skill Type*.
  1. Enter **Favorite Color** as the *Name*, and **my favorite color** as the
     *Invocation Name*.
  1. Click Next.
