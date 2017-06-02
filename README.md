@@ -136,6 +136,34 @@ Say: **Alexa, ask my favorite color**. Then just listen and respond!
     
     ![Clicking Next](readme-files/05.png)
 
+## Technical Notes
+
+When you start fiddling with the code, here are some things to keep in mind.
+
+### AWS Properties
+
+There are several settings you can adjust in [aws.properties](aws.properties) to
+control the Gradle script's interaction with AWS:
+
+ * **profile-name:** Credentials profile to use if you're using a
+   `$HOME/.aws/credentials` file for access to AWS; see the
+   [AWS CLI User Guide](http://docs.aws.amazon.com/cli/latest/userguide/cli-multiple-profiles.html)
+   for more information.
+ * **lambda-function-name:** Name of the Lambda created; you would use this to
+   identify your Lambda in the AWS Web Console, for instance.
+ * **lambda-handler:** Fully-qualified name of a class that extends
+   `SpeechletRequestStreamHandler` and will be used as the entrypoint of Alexa's
+   call to your Lambda.
+ * **lambda-memory-mb:** Memory allocated to the Lambda when it's running. The
+   minimum amount of 128MB is more than ample for simple Speechlets like the
+   example in this project. See the
+   [Lambda Developer Guide](http://docs.aws.amazon.com/lambda/latest/dg/lambda-introduction-function.html)
+   for more information.
+ * **lambda-timeout-seconds:** Amount of time the Lambda can run before it is
+   forcibly terminated (from 1 to 300 seconds). See the
+   [Lambda Developer Guide](http://docs.aws.amazon.com/lambda/latest/dg/lambda-introduction-function.html)
+   for more information.
+
 ## License
 
 Alexa Quickstart for Java is licensed under the Apache 2.0 License - see the
