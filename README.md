@@ -113,6 +113,8 @@ Say: **Alexa, ask my favorite color**. Then just listen and respond!
     1. Add a new *Custom Slot Type* named `COLOR`:
        
        ![Adding the COLOR Custom Slot Type](readme-files/08.png)
+       
+       (Don't forget to press the *Add* button!)
     1. Copy and paste the *Sample Utterance*.
        
        ![Pasting the Sample Utterance](readme-files/09.png)
