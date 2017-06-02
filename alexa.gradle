@@ -15,7 +15,10 @@
 */
 import com.amazonaws.auth.AWSCredentialsProvider
 import com.amazonaws.auth.AWSCredentialsProviderChain
+import com.amazonaws.auth.EC2ContainerCredentialsProviderWrapper
+import com.amazonaws.auth.EnvironmentVariableCredentialsProvider
 import com.amazonaws.auth.InstanceProfileCredentialsProvider
+import com.amazonaws.auth.SystemPropertiesCredentialsProvider
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.regions.Region
 import com.amazonaws.regions.Regions
@@ -53,6 +56,7 @@ buildscript {
 }
 
 class LambdaProperties {
+	String profileName
 	String lambdaFunctionName
 	String lambdaHandler
 	String lambdaIamRole
@@ -62,10 +66,7 @@ class LambdaProperties {
 }
 
 task alexaDeploySkill(dependsOn: ":build", description: "Deploys an Amazon Echo (Alexa) skill as an AWS Lambda function") {
-	AWSCredentialsProvider awsCredentialsProvider = new AWSCredentialsProviderChain(
-		InstanceProfileCredentialsProvider.getInstance(),
-		new ProfileCredentialsProvider()
-	)
+	AWSCredentialsProvider awsCredentialsProvider
 
 	def createOrResolveIamRoleArn = { LambdaProperties properties ->
 		AmazonIdentityManagement iam = new AmazonIdentityManagementClient(awsCredentialsProvider)
@@ -204,6 +205,7 @@ task alexaDeploySkill(dependsOn: ":build", description: "Deploys an Amazon Echo 
 			awsProperties.load(reader)
 
 			return new LambdaProperties(
+				profileName: awsProperties.getProperty("profile-name"),
 				lambdaFunctionName: awsProperties.getProperty("lambda-function-name"),
 				lambdaHandler: awsProperties.getProperty("lambda-handler"),
 				lambdaIamRole: awsProperties.getProperty("lambda-iam-role"),
@@ -213,6 +215,14 @@ task alexaDeploySkill(dependsOn: ":build", description: "Deploys an Amazon Echo 
 		}
 
 		properties.zipFilePath = Paths.get(project.buildDir.path, "distributions", project.name + ".zip")
+
+		awsCredentialsProvider = new AWSCredentialsProviderChain(
+			new EnvironmentVariableCredentialsProvider(),
+			new SystemPropertiesCredentialsProvider(),
+			new ProfileCredentialsProvider(properties.profileName),
+			new EC2ContainerCredentialsProviderWrapper(),
+			InstanceProfileCredentialsProvider.getInstance()
+		)
 
 		String arn = createOrUpdateLambda(properties)
 
