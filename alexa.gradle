@@ -110,7 +110,12 @@ task alexaDeploySkill(dependsOn: ":build", description: "Deploys an Amazon Echo 
 
 			iam.putRolePolicy(putRolePolicyRequest)
 
-			// TODO: I've seen one failure of the Lambda to create because the role wasn't accessible, yet. Need to figure out why, possibly wait for role availability.
+			// This is lame, but there appears to be some sort of propagation
+			// lag before Lambda is able to "see" the role. Waiting 10 seconds
+			// seems to take care of it. Polling for the resource to be
+			// available doesn't work, as it appears to be available immediately
+			// after creation--just not to Lambda.
+			sleep(10_000)
 
 			return arn
 		}
